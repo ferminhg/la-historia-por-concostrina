@@ -1,0 +1,28 @@
+name: la-historia-por-concostrina
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - python-dotenv
+  - requests
+  - numpy
+  - pandas
+  - scipy
+  - pytorch
+  - jupyterlab
+  - ipywidgets
+  - matplotlib
+  - scikit-learn
+  - chromadb
+  - jupyter-dash
+  - sentencepiece
+  - pyarrow
+  - faiss-cpu
+  - pip:
+    - transformers 
+    - torch 
+    - librosa 
+    - datasets 
+    - accelerate
