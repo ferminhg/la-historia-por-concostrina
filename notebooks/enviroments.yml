@@ -26,3 +26,5 @@ dependencies:
     - librosa 
     - datasets 
     - accelerate
+    - supabase
+    - openai
