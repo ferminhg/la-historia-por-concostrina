@@ -1,1 +1,1 @@
-# Infrastructure layer - Implementaciones concretas 
+# Infrastructure layer - Implementaciones concretas

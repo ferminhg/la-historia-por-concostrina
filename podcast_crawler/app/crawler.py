@@ -1,31 +1,38 @@
-import sys
 import argparse
-from typing import Optional
-
 import logging
+import os
+import sys
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from application.use_cases.crawl_podcast import CrawlPodcastUseCase
+from infrastructure.repositories.hardcoded_rss_url_repository import HardcodedRSSUrlRepository
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 def main() -> int:
-    """
-    Función principal del programa
-    """
     parser = argparse.ArgumentParser(
         description="Podcast Crawler - Herramienta para hacer crawling de podcasts de Nieves Concostrina"
     )
-    parser.add_argument(
-        "--version", 
-        action="version", 
-        version="podcast-crawler 1.0.0"
-    )
-    
+    parser.add_argument("--version", action="version", version="podcast-crawler 1.0.0")
+
     args = parser.parse_args()
+
+    logger.info("👋 Hi from Podcast Crawler! 🐛")
     
-    logger.info("¡Hola mundo desde Podcast Crawler!")
+    rss_url_repository = HardcodedRSSUrlRepository()
+    usecase = CrawlPodcastUseCase(rss_url_repository)
+    
+    podcasts = usecase.execute()
+    
+    logger.info(f"✅ Se obtuvieron {len(podcasts)} podcasts exitosamente")
+
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

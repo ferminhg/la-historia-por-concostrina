@@ -1,27 +1,21 @@
-"""
-Caso de uso para hacer crawling de un podcast
-"""
-from typing import Optional
-from ...domain.entities.podcast import Podcast
-from ...domain.repositories.podcast_repository import PodcastRepository
+from typing import List
+
+from domain.entities.podcast import Podcast
+from domain.repositories.rss_url_repository import RSSUrlRepository
 
 
 class CrawlPodcastUseCase:
-    """Caso de uso para hacer crawling de un podcast"""
-    
-    def __init__(self, repository: PodcastRepository):
-        self.repository = repository
-    
-    def execute(self, feed_url: str) -> Optional[Podcast]:
-        """
-        Ejecuta el crawling de un podcast
+
+    def __init__(self, rss_url_repository: RSSUrlRepository):
+        self.rss_url_repository = rss_url_repository
+
+    def execute(self) -> List[Podcast]:
+        podcasts = self.rss_url_repository.search()
         
-        Args:
-            feed_url: URL del feed RSS del podcast
-            
-        Returns:
-            Podcast crawleado o None si hay error
-        """
-        # TODO: Implementar lógica de crawling
-        print(f"Crawling podcast desde: {feed_url}")
-        return None 
+        for podcast in podcasts:
+            print(podcast)
+
+        return podcasts
+                
+    def get_podcasts(self) -> List[Podcast]:
+        return self.rss_url_repository.search()

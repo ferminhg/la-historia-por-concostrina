@@ -1,1 +1,1 @@
-# Domain layer - Entidades y reglas de negocio 
+# Domain layer - Entidades y reglas de negocio

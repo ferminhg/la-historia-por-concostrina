@@ -1,14 +1,10 @@
-"""
-Entidad Podcast del dominio
-"""
 from dataclasses import dataclass
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
 
 
 @dataclass(frozen=True)
 class Episode:
-    """Entidad que representa un episodio de podcast"""
     title: str
     description: str
     url: str
@@ -19,9 +15,11 @@ class Episode:
 
 @dataclass(frozen=True)
 class Podcast:
-    """Entidad que representa un podcast"""
     title: str
     description: str
     feed_url: str
     episodes: List[Episode]
-    last_updated: datetime 
+    last_updated: datetime
+
+    def __str__(self):
+        return f"Pmodcast(title={self.title}, description={self.description}, feed_url={self.feed_url}, episodes={self.episodes}, last_updated={self.last_updated})"

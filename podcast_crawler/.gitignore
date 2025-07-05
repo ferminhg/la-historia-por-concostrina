@@ -124,3 +124,5 @@ dmypy.json
 
 # Data files
 data/*.json 
+
+.ruff_cache/

@@ -26,7 +26,20 @@ pip install -e .
 
 ## Development Commands
 
-### Running the Podcast Crawler
+### Using Make (Recommended)
+```bash
+# From podcast_crawler directory
+make help          # Show all available commands
+make install       # Install dependencies and package
+make test          # Run tests
+make lint          # Run linting with ruff
+make format        # Format code with ruff
+make sort-imports  # Sort imports with ruff
+make clean         # Clean temporary files
+make run           # Run the podcast crawler
+```
+
+### Manual Commands
 ```bash
 # From podcast_crawler directory
 python -m app.crawler
@@ -113,3 +126,8 @@ Audio files are named using the format: `YYYY_MM_DD_HH.mp3` based on the episode
 ## Note on Implementation Status
 
 The podcast crawler is in early development - core functionality like RSS parsing and audio downloading is implemented in the Jupyter notebooks, but the hexagonal architecture components are mostly placeholder code requiring implementation.
+
+## Development Guidelines
+
+- **Code Comments**: 
+  - Stop adding unnecessary comments in code

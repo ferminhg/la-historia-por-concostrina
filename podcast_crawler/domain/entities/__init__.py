@@ -1,1 +1,1 @@
-# Entidades del dominio 
+# Entidades del dominio
