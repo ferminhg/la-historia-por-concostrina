@@ -1,0 +1,5 @@
+# Dependencias del proyecto
+pytest>=7.0.0
+pytest-cov>=4.0.0
+requests>=2.28.0
+feedparser>=6.0.0 
