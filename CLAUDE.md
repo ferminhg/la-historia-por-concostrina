@@ -31,7 +31,7 @@ pip install -e .
 # From podcast_crawler directory
 make help          # Show all available commands
 make install       # Install dependencies and package
-make test          # Run tests
+make tests         # Run tests
 make lint          # Run linting with ruff
 make format        # Format code with ruff
 make sort-imports  # Sort imports with ruff
@@ -54,6 +54,9 @@ podcast-crawler
 pytest tests/
 # Or with verbose output
 pytest -v tests/
+
+# Run specific test
+pytest tests/test_xml_processor.py::TestXMLProcessor::test_parses_duration_formats -v
 ```
 
 ### Jupyter Notebooks
@@ -68,47 +71,66 @@ jupyter lab
 
 ## Architecture
 
-### Podcast Crawler (Hexagonal Architecture)
-- **Domain Layer**: Core entities (Podcast, Episode) and repository interfaces
-- **Application Layer**: Use cases like CrawlPodcastUseCase
-- **Infrastructure Layer**: File-based repository implementation
-- **App Layer**: CLI entry point and argument parsing
+### Hexagonal Architecture Implementation
 
-### Key Files Structure
-```
-podcast_crawler/
-├── app/crawler.py                     # Main CLI application
-├── domain/
-│   ├── entities/podcast.py           # Podcast and Episode entities
-│   └── repositories/podcast_repository.py  # Repository interface
-├── application/use_cases/crawl_podcast.py  # Business logic
-└── infrastructure/repositories/file_podcast_repository.py  # File storage
-```
+The project implements hexagonal architecture with clear separation of concerns:
+
+**Domain Layer** (`domain/`):
+- `entities/` - Core business entities (Episode, Podcast, RSSUrl)
+- `repositories/` - Repository interfaces for data access
+- `builders/` - Builder pattern for immutable entity updates
+
+**Application Layer** (`application/`):
+- `use_cases/` - Business logic orchestration (CrawlPodcastUseCase)
+- `services/` - Application services (EpisodeDownloader)
+
+**Infrastructure Layer** (`infrastructure/`):
+- `repositories/` - Concrete repository implementations
+- `xml/` - XML processing with iTunes namespace support
+- `logging/` - Custom logging abstraction
+
+**Shared** (`shared/`):
+- Common utilities and abstractions used across layers
+
+### Key Components
+
+**Episode Processing Pipeline**:
+1. `HardcodedRSSUrlRepository` downloads RSS feeds to XML files
+2. `XMLProcessor` parses XML with iTunes namespace support, extracts Episode entities
+3. `EpisodeDownloader` downloads audio files and updates Episode with local file paths
+4. `LocalFileEpisodeRepository` handles local file storage with date-based naming
+
+**Logging System**:
+- Custom logging abstraction in `infrastructure/logging/`
+- Import via `from shared.logger import get_logger`
+- Configured for structured logging with timestamps
+
+**Testing**:
+- `tests/helpers/podcast_mother.py` - Test data builders using Object Mother pattern
+- Comprehensive test coverage for XML processing, episode downloading, and logging
 
 ### Data Flow
-1. RSS feeds are downloaded and parsed (scrapping_episodies.ipynb)
-2. Audio files are downloaded to `audios/` directory
-3. Audio transcriptions are generated using OpenAI API (audio_transcriptions.ipynb)
-4. Transcriptions are saved to `transcriptions/` directory
-5. Episode metadata is stored in `data/episodes.json`
+
+1. RSS feeds downloaded from hardcoded URLs
+2. XML parsed to extract episodes with iTunes duration and file size
+3. Episodes downloaded to `audios/` directory with format `YYYY_MM_DD_HH.mp3`
+4. Episode entities updated immutably with local file paths using builder pattern
+5. Existing files skipped to avoid re-downloads
 
 ## Dependencies
 
 ### Core Dependencies
-- **requests**: HTTP requests for RSS feeds and audio downloads
-- **feedparser**: RSS feed parsing
-- **openai**: Audio transcription via OpenAI API
-- **supabase**: Database integration
-- **pandas/numpy**: Data manipulation
-- **pytorch/transformers**: ML model support
+- **requests**: HTTP requests for RSS feeds and audio downloads  
+- **ruff**: Code formatting and linting
+- **pytest**: Testing framework
 
 ### Development Dependencies
-- **pytest**: Testing framework
-- **jupyterlab**: Notebook environment
+- **pytest-cov**: Test coverage
+- **jupyterlab**: Notebook environment for data analysis
 
 ## Environment Variables
 
-Required environment variables (use .env file):
+Required for audio transcription notebooks:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
@@ -123,11 +145,10 @@ The project crawls two RSS feeds:
 
 Audio files are named using the format: `YYYY_MM_DD_HH.mp3` based on the episode's publication date.
 
-## Note on Implementation Status
-
-The podcast crawler is in early development - core functionality like RSS parsing and audio downloading is implemented in the Jupyter notebooks, but the hexagonal architecture components are mostly placeholder code requiring implementation.
-
 ## Development Guidelines
 
-- **Code Comments**: 
-  - Stop adding unnecessary comments in code
+- **Code Style**: Use English for all programming code
+- **Comments**: Avoid unnecessary comments in code
+- **Immutability**: Use builder pattern for entity updates (see `EpisodeBuilder`)
+- **Testing**: Use Object Mother pattern for test data creation
+- **Logging**: Use custom logger abstraction, not direct Python logging

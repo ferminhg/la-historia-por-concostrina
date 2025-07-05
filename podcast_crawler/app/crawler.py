@@ -2,6 +2,9 @@ import argparse
 import os
 import sys
 
+from application.services.episode_downloader import EpisodeDownloader
+from infrastructure.repositories.local_file_episode_repository import LocalFileEpisodeRepository
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from application.use_cases.crawl_podcast import CrawlPodcastUseCase
@@ -23,7 +26,9 @@ def main() -> int:
 
     logger.info("👋 Hi from Podcast Crawler! 🐛")
     
-    rss_url_repository = HardcodedRSSUrlRepository(data_dir=data_dir)
+    audios_dir = os.path.join(os.path.dirname(data_dir), 'audios')
+    file_episode_repository = LocalFileEpisodeRepository(audios_dir)
+    rss_url_repository = HardcodedRSSUrlRepository(data_dir=data_dir, episode_downloader=EpisodeDownloader(file_episode_repository))
     usecase = CrawlPodcastUseCase(rss_url_repository)
     
     podcasts = usecase.execute()

@@ -21,7 +21,8 @@ class Episode:
     published_date: datetime
     duration: Optional[int] = None
     file_size: Optional[int] = None
-    podcast: Podcast = None
+    podcast: Optional[Podcast] = None
+    local_file_path: Optional[str] = None
     
     def __str__(self):
-        return f"Episode(title={self.title}, description={self.description}, url={self.url}, published_date={self.published_date}, duration={self.duration}"
+        return f"Episode(title={self.title}, description={self.description}, url={self.url}, published_date={self.published_date}, duration={self.duration}, local_file_path={self.local_file_path})"
