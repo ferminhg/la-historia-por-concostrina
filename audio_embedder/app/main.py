@@ -9,17 +9,18 @@ from .application.use_cases.process_episodes import ProcessEpisodesUseCase
 from .application.use_cases.search_episodes import SearchEpisodesUseCase
 from .shared.logger import get_logger
 
+data_dir = "../data"
 
 def main():
     parser = argparse.ArgumentParser(description="Audio Embedder CLI")
     parser.add_argument("--episodes-file", 
-                       default="../data/episodes.json",
+                       default=os.path.join(data_dir, "episodes.json"),
                        help="Path to episodes.json file")
     parser.add_argument("--transcriptions-dir", 
-                       default="./data/transcriptions",
+                       default=os.path.join(data_dir, "transcriptions"),
                        help="Directory to store transcriptions")
     parser.add_argument("--embeddings-dir", 
-                       default="./data/embeddings",
+                       default="../data/embeddings",
                        help="Directory to store embeddings")
     parser.add_argument("--command", 
                        choices=["process", "search"],
