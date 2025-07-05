@@ -21,21 +21,48 @@ conda activate la-historia-por-concostrina
 
 ### Python Packages
 ```bash
-# Install podcast_crawler
-cd podcast_crawler
-pip install -e .
+# Install all packages from root directory (recommended)
+make install
 
-# Install audio_embedder
-cd ../audio_embedder
-pip install -e .
+# Or install individually
+cd podcast_crawler && pip install -e .
+cd audio_embedder && pip install -e .
+
+# Or install specific packages
+make install-crawler    # Only podcast_crawler
+make install-embedder   # Only audio_embedder
 ```
 
 ## Development Commands
 
-### Podcast Crawler
+### Global Commands (from root directory)
 ```bash
-# From podcast_crawler directory
-make help          # Show all available commands
+make help                 # Show all available commands
+make install              # Install all dependencies and packages
+make tests                # Run all tests
+make lint                 # Run linting on all packages
+make format               # Format code in all packages
+make clean                # Clean temporary files
+
+# Run applications
+make run-crawler          # Run podcast crawler
+make run-embedder         # Run audio embedder (mock transcriptor)
+make run-embedder-openai  # Run audio embedder (OpenAI transcriptor)
+
+# Individual package installation
+make install-crawler      # Install only podcast_crawler
+make install-embedder     # Install only audio_embedder
+
+# Individual package testing
+make tests-crawler        # Run only podcast_crawler tests
+make tests-embedder       # Run only audio_embedder tests
+```
+
+### Package-Specific Commands
+
+**Podcast Crawler** (from `podcast_crawler/` directory):
+```bash
+make help          # Show package-specific commands
 make install       # Install dependencies and package
 make tests         # Run tests
 make lint          # Run linting with ruff
@@ -50,33 +77,40 @@ python -m app.crawler
 podcast-crawler
 ```
 
-### Audio Embedder
+**Audio Embedder** (from `audio_embedder/` directory):
 ```bash
-# From audio_embedder directory
-make help          # Show all available commands
+make help          # Show package-specific commands
 make install       # Install dependencies and package
 make tests         # Run tests
 make lint          # Run linting with ruff
 make format        # Format code with ruff
 make sort-imports  # Sort imports with ruff
 make clean         # Clean temporary files
-make run           # Run episode processing
+make run           # Run episode processing (mock transcriptor)
+make run-openai    # Run with OpenAI transcriptor
+make search        # Search episodes
 
-# Manual execution with different commands
-python -m app.main --command process  # Process episodes into transcriptions and embeddings
-python -m app.main --command search --query "your search query"  # Search episodes
+# Manual execution
+python -m app.main --command process --transcriptor mock
+python -m app.main --command process --transcriptor openai
+python -m app.main --command search --query "your search query"
 ```
 
 ### Running Tests
 ```bash
-# From podcast_crawler directory
-pytest tests/
-pytest -v tests/
-pytest tests/test_xml_processor.py::TestXMLProcessor::test_parses_duration_formats -v
+# All tests from root
+make tests
 
-# From audio_embedder directory
-pytest tests/
-pytest -v tests/
+# Individual package tests
+make tests-crawler
+make tests-embedder
+
+# Or manually
+cd podcast_crawler && pytest tests/ -v
+cd audio_embedder && pytest tests/ -v
+
+# Specific test
+pytest tests/test_xml_processor.py::TestXMLProcessor::test_parses_duration_formats -v
 ```
 
 ### Jupyter Notebooks
@@ -158,10 +192,13 @@ Both packages use consistent testing patterns:
 
 ## Dependencies
 
-### Runtime Dependencies
+### Shared Dependencies (requirements.txt)
 - **requests**: HTTP requests for RSS feeds and audio downloads  
-- **ruff**: Code formatting and linting
+- **openai**: OpenAI API client for audio transcription
+- **feedparser**: RSS feed parsing
 - **pytest**: Testing framework
+- **pytest-cov**: Test coverage reporting
+- **ruff**: Code formatting and linting
 
 ### Conda Environment Dependencies (notebooks/enviroments.yml)
 - **Python 3.11**: Base runtime

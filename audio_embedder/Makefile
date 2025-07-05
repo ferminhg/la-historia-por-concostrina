@@ -1,14 +1,16 @@
-.PHONY: help install tests lint format sort-imports clean run
+.PHONY: help install tests lint format sort-imports clean run run-openai search
 
 help:
 	@echo "Available commands:"
-	@echo "  install      - Install dependencies and package"
-	@echo "  tests        - Run tests"
-	@echo "  lint         - Run linting with ruff"
-	@echo "  format       - Format code with ruff"
-	@echo "  sort-imports - Sort imports with ruff"
-	@echo "  clean        - Clean temporary files"
-	@echo "  run          - Run the audio embedder"
+	@echo "  install       - Install dependencies and package"
+	@echo "  tests         - Run tests"
+	@echo "  lint          - Run linting with ruff"
+	@echo "  format        - Format code with ruff"
+	@echo "  sort-imports  - Sort imports with ruff"
+	@echo "  clean         - Clean temporary files"
+	@echo "  run           - Run the audio embedder (mock transcriptor)"
+	@echo "  run-openai    - Run the audio embedder with OpenAI transcriptor"
+	@echo "  search        - Search episodes with mock data"
 
 install:
 	pip install -e .
@@ -34,4 +36,10 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
 run:
-	python -m app.main
+	python -m app.main --transcriptor mock
+
+run-openai:
+	python -m app.main --transcriptor openai
+
+search:
+	python -m app.main --command search --query "historia"

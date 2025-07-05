@@ -4,6 +4,7 @@ from .infrastructure.repositories.json_episode_repository import JSONEpisodeRepo
 from .infrastructure.repositories.file_transcription_repository import FileTranscriptionRepository
 from .infrastructure.repositories.mock_embedding_repository import MockEmbeddingRepository
 from .infrastructure.transcriptor.mock_audio_transcriptor import MockAudioTranscriptor
+from .infrastructure.transcriptor.openai_audio_transcriptor import OpenAIAudioTranscriptor
 from .infrastructure.embedder.mock_embedding_service import MockEmbeddingService
 from .application.use_cases.process_episodes import ProcessEpisodesUseCase
 from .application.use_cases.search_episodes import SearchEpisodesUseCase
@@ -32,6 +33,10 @@ def main():
                        type=int, 
                        default=10,
                        help="Number of results to return for search")
+    parser.add_argument("--transcriptor", 
+                       choices=["mock", "openai"],
+                       default="mock",
+                       help="Transcriptor to use (mock or openai)")
     
     args = parser.parse_args()
     
@@ -40,7 +45,14 @@ def main():
     episode_repository = JSONEpisodeRepository(args.episodes_file)
     transcription_repository = FileTranscriptionRepository(args.transcriptions_dir)
     embedding_repository = MockEmbeddingRepository(args.embeddings_dir)
-    audio_transcriptor = MockAudioTranscriptor()
+    
+    if args.transcriptor == "openai":
+        audio_transcriptor = OpenAIAudioTranscriptor()
+        logger.info("Using OpenAI transcriptor")
+    else:
+        audio_transcriptor = MockAudioTranscriptor()
+        logger.info("Using mock transcriptor")
+    
     embedding_service = MockEmbeddingService()
     
     if args.command == "process":

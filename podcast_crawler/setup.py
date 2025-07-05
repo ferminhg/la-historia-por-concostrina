@@ -3,10 +3,13 @@ from setuptools import find_packages, setup
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [
-        line.strip() for line in fh if line.strip() and not line.startswith("#")
-    ]
+requirements = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0", 
+    "requests>=2.28.0",
+    "feedparser>=6.0.0",
+    "ruff>=0.1.0"
+]
 
 setup(
     name="podcast-crawler",

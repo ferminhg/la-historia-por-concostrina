@@ -3,6 +3,7 @@ pytest>=7.0.0
 pytest-cov>=4.0.0
 requests>=2.28.0
 feedparser>=6.0.0
+openai>=1.0.0
 
 # Herramientas de desarrollo
-ruff>=0.1.0 
+ruff>=0.1.0

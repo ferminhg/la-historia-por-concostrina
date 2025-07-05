@@ -13,7 +13,7 @@ help:
 
 install:
 	@echo "Installing dependencies... 📦"
-	pip install -r requirements.txt
+	pip install -r ../requirements.txt
 	pip install -e .
 	@echo "✅ Installation completed"
 
