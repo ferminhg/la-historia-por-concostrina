@@ -1,51 +1,51 @@
-.PHONY: help install test lint format sort-imports clean run
+.PHONY: help install tests lint format sort-imports clean run
 
 help:
-	@echo "Comandos disponibles:"
-	@echo "  install       - Instalar dependencias y paquete en modo desarrollo"
-	@echo "  test          - Ejecutar tests con pytest"
-	@echo "  lint          - Ejecutar linting con ruff"
-	@echo "  format        - Formatear código con ruff"
-	@echo "  sort-imports  - Ordenar imports con ruff"
-	@echo "  clean         - Limpiar archivos temporales"
-	@echo "  run           - Ejecutar el crawler"
-	@echo "  help          - Mostrar esta ayuda"
+	@echo "Available commands: 🛠️"
+	@echo "  install       - Install dependencies and package in development mode 📦"
+	@echo "  tests         - Run tests with pytest 🧪"
+	@echo "  lint          - Run linting with ruff 🔍"
+	@echo "  format        - Format code with ruff 🎨"
+	@echo "  sort-imports  - Sort imports with ruff 📚"
+	@echo "  clean         - Clean temporary files 🧹"
+	@echo "  run           - Run the crawler 🚀"
+	@echo "  help          - Show this help ℹ️"
 
 install:
-	@echo "Instalando dependencias..."
+	@echo "Installing dependencies... 📦"
 	pip install -r requirements.txt
 	pip install -e .
-	@echo "✅ Instalación completada"
+	@echo "✅ Installation completed"
 
-test:
-	@echo "Ejecutando tests..."
+tests:
+	@echo "Running tests... 🧪"
 	pytest tests/ -v
-	@echo "✅ Tests completados"
+	@echo "✅ Tests completed"
 
 lint:
-	@echo "Ejecutando linting..."
+	@echo "Running linting... 🔍"
 	ruff check .
-	@echo "✅ Linting completado"
+	@echo "✅ Linting completed"
 
 format:
-	@echo "Formateando código..."
+	@echo "Formatting code... 🎨"
 	ruff format .
-	@echo "✅ Formateo completado"
+	@echo "✅ Formatting completed"
 
 sort-imports:
-	@echo "Ordenando imports..."
+	@echo "Sorting imports... 📚"
 	ruff check --select I --fix .
-	@echo "✅ Imports ordenados"
+	@echo "✅ Imports sorted"
 
 clean:
-	@echo "Limpiando archivos temporales..."
+	@echo "Cleaning temporary files... 🧹"
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name ".coverage" -delete
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-	@echo "✅ Limpieza completada"
+	@echo "✅ Clean completed"
 
 run:
-	@echo "Ejecutando podcast crawler..."
+	@echo "Running podcast crawler... 🚀"
 	python -m app.crawler

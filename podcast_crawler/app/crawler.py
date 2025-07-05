@@ -1,5 +1,4 @@
 import argparse
-import logging
 import os
 import sys
 
@@ -7,11 +6,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from application.use_cases.crawl_podcast import CrawlPodcastUseCase
 from infrastructure.repositories.hardcoded_rss_url_repository import HardcodedRSSUrlRepository
+from shared.logger import get_logger
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 data_dir = os.path.join(os.path.dirname(__file__), "../../data")
 
