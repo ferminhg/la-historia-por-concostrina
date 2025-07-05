@@ -5,7 +5,6 @@ from domain.entities.podcast import Podcast
 
 
 class RSSUrlRepository(ABC):
-
     @abstractmethod
     def search(self) -> List[Podcast]:
         pass

@@ -10,7 +10,6 @@ from app.crawler import main
 
 
 class TestMain:
-
     @patch("sys.argv", ["app.crawler"])
     @patch("builtins.print")
     def test_main_prints_hello_world(self, mock_print):

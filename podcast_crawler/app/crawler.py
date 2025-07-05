@@ -13,6 +13,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+data_dir = os.path.join(os.path.dirname(__file__), "../../data")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -24,7 +26,7 @@ def main() -> int:
 
     logger.info("👋 Hi from Podcast Crawler! 🐛")
     
-    rss_url_repository = HardcodedRSSUrlRepository()
+    rss_url_repository = HardcodedRSSUrlRepository(data_dir=data_dir)
     usecase = CrawlPodcastUseCase(rss_url_repository)
     
     podcasts = usecase.execute()
