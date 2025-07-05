@@ -3,12 +3,17 @@ import os
 import sys
 
 from application.services.episode_downloader import EpisodeDownloader
-from infrastructure.repositories.local_file_episode_repository import LocalFileEpisodeRepository
+from infrastructure.repositories.local_file_episode_repository import (
+    LocalFileEpisodeRepository,
+)
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from application.use_cases.crawl_podcast import CrawlPodcastUseCase
-from infrastructure.repositories.hardcoded_rss_url_repository import HardcodedRSSUrlRepository
+from infrastructure.repositories.hardcoded_rss_url_repository import (
+    HardcodedRSSUrlRepository,
+)
+from infrastructure.repositories.json_episode_repository import JSONEpisodeRepository
 from shared.logger import get_logger
 
 logger = get_logger(__name__)
@@ -25,14 +30,20 @@ def main() -> int:
     args = parser.parse_args()
 
     logger.info("👋 Hi from Podcast Crawler! 🐛")
-    
-    audios_dir = os.path.join(os.path.dirname(data_dir), 'audios')
+
+    audios_dir = os.path.join(os.path.dirname(data_dir), "audios")
     file_episode_repository = LocalFileEpisodeRepository(audios_dir)
-    rss_url_repository = HardcodedRSSUrlRepository(data_dir=data_dir, episode_downloader=EpisodeDownloader(file_episode_repository))
-    usecase = CrawlPodcastUseCase(rss_url_repository)
-    
+    rss_url_repository = HardcodedRSSUrlRepository(
+        data_dir=data_dir, episode_downloader=EpisodeDownloader(file_episode_repository)
+    )
+
+    episodes_json_path = os.path.join(data_dir, "episodes.json")
+    json_episode_repository = JSONEpisodeRepository(episodes_json_path)
+
+    usecase = CrawlPodcastUseCase(rss_url_repository, json_episode_repository)
+
     podcasts = usecase.execute()
-    
+
     logger.info(f"✅ Se obtuvieron {len(podcasts)} podcasts exitosamente")
 
     return 0

@@ -65,7 +65,6 @@ class PodcastBuilder:
         self._title = self._random_string()
         self._description = self._random_string(100)
         self._feed_url = f"https://example.com/{self._random_string()}/podcast.xml"
-        self._episodes = [EpisodeBuilder().build()]
         self._last_updated = datetime.now()
 
     def with_title(self, title: str) -> "PodcastBuilder":
@@ -80,14 +79,6 @@ class PodcastBuilder:
         self._feed_url = feed_url
         return self
 
-    def with_episodes(self, episodes: List[Episode]) -> "PodcastBuilder":
-        self._episodes = episodes
-        return self
-
-    def with_episode_count(self, count: int) -> "PodcastBuilder":
-        self._episodes = [EpisodeBuilder().build() for _ in range(count)]
-        return self
-
     def with_last_updated(self, last_updated: datetime) -> "PodcastBuilder":
         self._last_updated = last_updated
         return self
@@ -97,7 +88,6 @@ class PodcastBuilder:
             title=self._title,
             description=self._description,
             feed_url=self._feed_url,
-            episodes=self._episodes,
             last_updated=self._last_updated,
         )
 
@@ -114,18 +104,6 @@ class PodcastMother:
     @staticmethod
     def with_title(title: str) -> Podcast:
         return PodcastBuilder().with_title(title).build()
-
-    @staticmethod
-    def with_episodes(episodes: List[Episode]) -> Podcast:
-        return PodcastBuilder().with_episodes(episodes).build()
-
-    @staticmethod
-    def with_episode_count(count: int) -> Podcast:
-        return PodcastBuilder().with_episode_count(count).build()
-
-    @staticmethod
-    def empty() -> Podcast:
-        return PodcastBuilder().with_episodes([]).build()
 
     @staticmethod
     def history_podcast() -> Podcast:

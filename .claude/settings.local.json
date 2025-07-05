@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(rm:*)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(find:*)",
+      "Bash(python -m pytest tests/test_crawl_podcast_use_case.py::TestCrawlPodcastUseCase::test_execute_handles_empty_episode_list -v)",
+      "Bash(python -m pytest tests/test_json_episode_repository.py::TestJSONEpisodeRepository::test_saves_episode_with_podcast_data -v)"
     ],
     "deny": []
   }
