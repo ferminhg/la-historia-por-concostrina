@@ -164,7 +164,7 @@ class TestProcessEpisodesUseCase:
         episode_repository.get_all.assert_called_once()
         transcription_repository.get_by_episode_id.assert_called_once_with(episode1.id)
         audio_transcriptor.transcribe.assert_called_once_with(episode1)
-        transcription_repository.save.assert_not_called()
+        transcription_repository.save.assert_called_once_with(transcription)
         embedding_service.create_embeddings.assert_not_called()
         embedding_repository.save_batch.assert_not_called()
 

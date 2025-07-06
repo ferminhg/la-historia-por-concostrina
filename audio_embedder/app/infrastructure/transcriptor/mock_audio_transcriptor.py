@@ -15,5 +15,4 @@ class MockAudioTranscriptor(AudioTranscriptor):
             created_at=datetime.now(),
             duration=episode.duration,
             file_path=None,
-            confidence_score=0.95,
         )

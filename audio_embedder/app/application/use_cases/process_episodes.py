@@ -24,10 +24,11 @@ class ProcessEpisodesUseCase:
 
     def execute(self, dry_run: bool = False) -> None:
         episodes = self.episode_repository.get_all()
-
+        
         if dry_run:
-            self.logger.info("🧪 DRY RUN MODE: Processing only the first episode")
-            episodes = episodes[:1] if episodes else []
+            import random
+            self.logger.info("🧪 DRY RUN MODE: Processing a random episode")
+            episodes = [random.choice(episodes)] if episodes else []
 
             if not episodes:
                 self.logger.warning("No episodes found for dry run")
@@ -58,17 +59,14 @@ class ProcessEpisodesUseCase:
                 )
                 continue
 
+            saved_transcription = self.transcription_repository.save(transcription)
+            self.logger.info(f"[{i}/{total_episodes}] Transcription saved")
+
             if dry_run:
                 self.logger.info(
-                    f"[{i}/{total_episodes}] DRY RUN: Would save transcription"
-                )
-                self.logger.info(
-                    f"[{i}/{total_episodes}] DRY RUN: Would create embeddings"
+                    f"[{i}/{total_episodes}] DRY RUN: Skipping embeddings creation"
                 )
             else:
-                saved_transcription = self.transcription_repository.save(transcription)
-                self.logger.info(f"[{i}/{total_episodes}] Transcription saved")
-
                 embeddings = self.embedding_service.create_embeddings(
                     saved_transcription
                 )
@@ -76,4 +74,4 @@ class ProcessEpisodesUseCase:
                 self.logger.info(f"[{i}/{total_episodes}] Embeddings created and saved")
 
         if dry_run:
-            self.logger.info("🧪 DRY RUN completed - no data was actually saved")
+            self.logger.info("🧪 DRY RUN completed - transcriptions saved, embeddings skipped")

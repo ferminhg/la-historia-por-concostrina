@@ -41,7 +41,6 @@ class EpisodeMother:
         created_at: datetime = None,
         duration: int = 900,
         file_path: str = None,
-        confidence_score: float = 0.95,
     ) -> Transcription:
         if created_at is None:
             created_at = datetime.now()
@@ -53,7 +52,6 @@ class EpisodeMother:
             created_at=created_at,
             duration=duration,
             file_path=file_path,
-            confidence_score=confidence_score,
         )
 
     @staticmethod

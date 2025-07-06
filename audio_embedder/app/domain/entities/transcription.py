@@ -11,4 +11,3 @@ class Transcription:
     created_at: datetime
     duration: int
     file_path: Optional[str] = None
-    confidence_score: Optional[float] = None

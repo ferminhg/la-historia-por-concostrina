@@ -5,11 +5,13 @@ from typing import Optional
 
 from ...domain.entities.transcription import Transcription
 from ...domain.repositories.transcription_repository import TranscriptionRepository
+from ...shared.logger import get_logger
 
 
 class FileTranscriptionRepository(TranscriptionRepository):
     def __init__(self, base_path: str):
         self.base_path = base_path
+        self.logger = get_logger(self.__class__.__name__)
         os.makedirs(base_path, exist_ok=True)
 
     def get_by_episode_id(self, episode_id: str) -> Optional[Transcription]:
@@ -26,11 +28,31 @@ class FileTranscriptionRepository(TranscriptionRepository):
 
     def save(self, transcription: Transcription) -> Transcription:
         file_path = self._get_file_path(transcription.episode_id)
+        
+        # Check if file already exists
+        if os.path.exists(file_path):
+            self.logger.info(
+                f"Transcription file already exists for episode {transcription.episode_id}, "
+                f"skipping save to preserve existing data"
+            )
+            # Return the existing transcription instead of overwriting
+            existing_transcription = self.get_by_episode_id(transcription.episode_id)
+            if existing_transcription:
+                return existing_transcription
+            else:
+                # Fallback if file exists but couldn't be read
+                self.logger.warning(
+                    f"Could not read existing transcription file for episode {transcription.episode_id}, "
+                    f"returning new transcription without saving"
+                )
+                return transcription
+        
+        # File doesn't exist, safe to create new one
         data = self._transcription_to_dict(transcription)
-
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=2)
-
+        
+        self.logger.info(f"Transcription saved for episode {transcription.episode_id}")
         return transcription
 
     def get_all(self) -> list[Transcription]:
@@ -58,7 +80,6 @@ class FileTranscriptionRepository(TranscriptionRepository):
             created_at=datetime.fromisoformat(data["created_at"]),
             duration=data["duration"],
             file_path=data.get("file_path"),
-            confidence_score=data.get("confidence_score"),
         )
 
     def _transcription_to_dict(self, transcription: Transcription) -> dict:
@@ -69,5 +90,4 @@ class FileTranscriptionRepository(TranscriptionRepository):
             "created_at": transcription.created_at.isoformat(),
             "duration": transcription.duration,
             "file_path": transcription.file_path,
-            "confidence_score": transcription.confidence_score,
         }

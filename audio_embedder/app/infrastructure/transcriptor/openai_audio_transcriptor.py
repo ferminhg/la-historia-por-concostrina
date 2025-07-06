@@ -12,7 +12,7 @@ from ...shared.logger import get_logger
 
 class OpenAIAudioTranscriptor(AudioTranscriptor):
     def __init__(
-        self, api_key: Optional[str] = None, model: str = "gpt-4o-mini-transcribe"
+        self, api_key: Optional[str] = None, model: str = "whisper-1"
     ):
         self.logger = get_logger(self.__class__.__name__)
         self.model = model
@@ -31,15 +31,14 @@ class OpenAIAudioTranscriptor(AudioTranscriptor):
             self.logger.info(f"Starting transcription for episode: {episode.title}")
 
             with open(episode.local_file_path, "rb") as audio_file:
-                stream = self.client.audio.transcriptions.create(
-                    file=audio_file, model=self.model, stream=True, language="es"
+                response = self.client.audio.transcriptions.create(
+                    file=audio_file, 
+                    model=self.model, 
+                    language="es",
+                    response_format="text"
                 )
 
-                transcription_text = ""
-
-                for event in stream:
-                    if hasattr(event, "text") and event.text:
-                        transcription_text += event.text
+                transcription_text = response
 
                 if not transcription_text.strip():
                     self.logger.warning(
@@ -54,11 +53,11 @@ class OpenAIAudioTranscriptor(AudioTranscriptor):
                     created_at=datetime.now(),
                     duration=episode.duration,
                     file_path=episode.local_file_path,
-                    confidence_score=None,
                 )
 
                 self.logger.info(
-                    f"Successfully transcribed episode: {episode.title} ({len(transcription_text)} characters)"
+                    f"Successfully transcribed episode: {episode.title} "
+                    f"({len(transcription_text)} characters)"
                 )
                 return transcription
 

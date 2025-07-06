@@ -9,7 +9,8 @@
       "Bash(python -m pytest tests/test_json_episode_repository.py::TestJSONEpisodeRepository::test_saves_episode_with_podcast_data -v)",
       "Bash(mkdir:*)",
       "Bash(pytest:*)",
-      "Bash(ruff check:*)"
+      "Bash(ruff check:*)",
+      "Bash(timeout 10s make dry-run-openai)"
     ],
     "deny": []
   }
