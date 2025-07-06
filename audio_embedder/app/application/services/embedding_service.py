@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import List
-from ...domain.entities.transcription import Transcription
+
 from ...domain.entities.embedding import Embedding
+from ...domain.entities.transcription import Transcription
 
 
 class EmbeddingService(ABC):
     @abstractmethod
-    def create_embeddings(self, transcription: Transcription) -> List[Embedding]:
+    def create_embeddings(self, transcription: Transcription) -> list[Embedding]:
         pass
-    
+
     @abstractmethod
-    def create_query_embedding(self, query_text: str) -> List[float]:
+    def create_query_embedding(self, query_text: str) -> list[float]:
         pass

@@ -31,6 +31,12 @@ make run
 # Process episodes with OpenAI transcriptor
 make run-openai
 
+# Run in dry-run mode (process only first episode, no data saved)
+make dry-run
+
+# Run in dry-run mode with OpenAI transcriptor
+make dry-run-openai
+
 # Search episodes
 make search
 
@@ -50,9 +56,27 @@ python -m app.main --command process --transcriptor openai
 # Search episodes
 python -m app.main --command search --query "your search query"
 
+# Dry-run mode (test with first episode only)
+python -m app.main --command process --transcriptor mock --dry-run
+python -m app.main --command process --transcriptor openai --dry-run
+
 # Custom file paths
 python -m app.main --episodes-file /path/to/episodes.json --transcriptions-dir /path/to/transcriptions
 ```
+
+## Execution Modes
+
+### Normal Mode
+Processes all episodes found in the episodes.json file, skipping those with existing transcriptions.
+
+### Dry-Run Mode
+- Processes only the first episode from episodes.json
+- Performs transcription but doesn't save transcriptions or embeddings to disk
+- Useful for testing transcription services without affecting data
+- Shows detailed logging of what would be done in normal mode
+- Perfect for validating OpenAI API setup and credentials
+
+Use `--dry-run` flag or `make dry-run` / `make dry-run-openai` commands.
 
 ## Transcription Services
 

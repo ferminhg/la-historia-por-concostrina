@@ -1,6 +1,10 @@
+import os
+import sys
 import unittest
 from abc import ABC
 from typing import List
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from domain.entities.podcast import Episode
 from domain.repositories.episode_repository import EpisodeRepository
@@ -105,6 +109,22 @@ class TestEpisodeRepository(unittest.TestCase):
 
         self.assertIsInstance(result, Episode)
         self.assertEqual(result.title, "Test Title")
+
+
+class TestEpisodeIdGeneration(unittest.TestCase):
+    def test_episode_id_is_generated_from_published_date(self):
+        from datetime import datetime
+        from domain.entities.podcast import Episode
+
+        published_date = datetime(2024, 6, 18, 15, 30, 45)
+        episode = Episode(
+            title="Test",
+            description="Desc",
+            url="http://test.com",
+            published_date=published_date
+        )
+        expected_id = "20240618_153045"
+        self.assertEqual(episode.id, expected_id)
 
 
 if __name__ == "__main__":

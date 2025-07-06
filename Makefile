@@ -1,4 +1,4 @@
-.PHONY: help install install-crawler install-embedder tests tests-crawler tests-embedder lint format clean run-crawler run-embedder run-embedder-openai
+.PHONY: help install install-crawler install-embedder tests tests-crawler tests-embedder lint format clean run-crawler run-embedder run-embedder-openai dry-run-embedder dry-run-embedder-openai
 
 help:
 	@echo "🎙️  La Historia Por Concostrina - Development Commands"
@@ -19,9 +19,11 @@ help:
 	@echo "  clean             - Clean temporary files in all packages"
 	@echo ""
 	@echo "🚀 Execution:"
-	@echo "  run-crawler       - Run podcast crawler"
-	@echo "  run-embedder      - Run audio embedder (mock transcriptor)"
-	@echo "  run-embedder-openai - Run audio embedder (OpenAI transcriptor)"
+	@echo "  run-crawler            - Run podcast crawler"
+	@echo "  run-embedder           - Run audio embedder (mock transcriptor)"
+	@echo "  run-embedder-openai    - Run audio embedder (OpenAI transcriptor)"
+	@echo "  dry-run-embedder       - Run audio embedder in dry-run mode (mock, 1 episode)"
+	@echo "  dry-run-embedder-openai - Run audio embedder in dry-run mode (OpenAI, 1 episode)"
 	@echo ""
 	@echo "📚 Individual package commands available in:"
 	@echo "  cd podcast_crawler && make help"
@@ -94,3 +96,12 @@ run-embedder-openai:
 	@echo "🚀 Running audio embedder (OpenAI transcriptor)..."
 	@echo "⚠️  Make sure OPENAI_API_KEY is set!"
 	cd audio_embedder && python -m app.main --transcriptor openai
+
+dry-run-embedder:
+	@echo "🧪 Running audio embedder in DRY RUN mode (mock transcriptor)..."
+	cd audio_embedder && python -m app.main --transcriptor mock --dry-run
+
+dry-run-embedder-openai:
+	@echo "🧪 Running audio embedder in DRY RUN mode (OpenAI transcriptor)..."
+	@echo "⚠️  Make sure OPENAI_API_KEY is set!"
+	cd audio_embedder && python -m app.main --transcriptor openai --dry-run

@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 
 @dataclass(frozen=True)
 class Episode:
+    id: str
     title: str
     description: str
     url: str

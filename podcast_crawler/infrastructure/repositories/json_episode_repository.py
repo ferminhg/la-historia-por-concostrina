@@ -14,6 +14,7 @@ class JSONEpisodeRepository(EpisodeRepository):
         episodes_data = []
         for episode in episodes:
             episode_dict = {
+                "id": episode.id,
                 "title": episode.title,
                 "description": episode.description,
                 "url": episode.url,

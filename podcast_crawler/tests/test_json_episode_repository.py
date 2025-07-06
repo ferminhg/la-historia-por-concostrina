@@ -1,9 +1,12 @@
 import json
 import os
+import sys
 import tempfile
 import unittest
 from datetime import datetime
 from typing import List
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from domain.entities.podcast import Episode, Podcast
 from infrastructure.repositories.json_episode_repository import JSONEpisodeRepository

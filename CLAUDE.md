@@ -45,9 +45,11 @@ make format               # Format code in all packages
 make clean                # Clean temporary files
 
 # Run applications
-make run-crawler          # Run podcast crawler
-make run-embedder         # Run audio embedder (mock transcriptor)
-make run-embedder-openai  # Run audio embedder (OpenAI transcriptor)
+make run-crawler            # Run podcast crawler
+make run-embedder           # Run audio embedder (mock transcriptor)
+make run-embedder-openai    # Run audio embedder (OpenAI transcriptor)
+make dry-run-embedder       # Run audio embedder in dry-run mode (mock, 1 episode)
+make dry-run-embedder-openai # Run audio embedder in dry-run mode (OpenAI, 1 episode)
 
 # Individual package installation
 make install-crawler      # Install only podcast_crawler
@@ -88,11 +90,15 @@ make sort-imports  # Sort imports with ruff
 make clean         # Clean temporary files
 make run           # Run episode processing (mock transcriptor)
 make run-openai    # Run with OpenAI transcriptor
+make dry-run       # Run in dry-run mode (mock, 1 episode)
+make dry-run-openai # Run in dry-run mode (OpenAI, 1 episode)
 make search        # Search episodes
 
 # Manual execution
 python -m app.main --command process --transcriptor mock
 python -m app.main --command process --transcriptor openai
+python -m app.main --command process --transcriptor mock --dry-run
+python -m app.main --command process --transcriptor openai --dry-run
 python -m app.main --command search --query "your search query"
 ```
 
@@ -160,11 +166,13 @@ Both `podcast_crawler` and `audio_embedder` implement hexagonal architecture wit
 
 **Audio Embedding Pipeline** (audio_embedder):
 1. `JSONEpisodeRepository` reads episodes from `data/episodes.json`
-2. `AudioTranscriptor` creates transcriptions from audio files
+2. `AudioTranscriptor` creates transcriptions from audio files (OpenAI or Mock)
 3. `FileTranscriptionRepository` stores transcriptions in `audio_embedder/data/transcriptions/`
 4. `EmbeddingService` chunks text and creates vector embeddings
 5. `EmbeddingRepository` stores embeddings for semantic search
 6. `SearchEpisodesUseCase` enables semantic search across episode content
+
+**Dry-Run Mode**: Process only the first episode without saving data, useful for testing transcription services and validating API credentials.
 
 ### Data Flow Architecture
 
@@ -179,9 +187,10 @@ RSS Feeds → podcast_crawler → episodes.json + audio files → audio_embedder
 
 **Stage 2: Content Processing** (audio_embedder)
 - Reads episode metadata from `data/episodes.json`
-- Transcribes audio files using `AudioTranscriptor`
+- Transcribes audio files using `AudioTranscriptor` (OpenAI or Mock)
 - Creates vector embeddings for semantic search
 - Enables search functionality across podcast content
+- Supports dry-run mode for testing without data persistence
 
 ### Testing Architecture
 
@@ -189,6 +198,23 @@ Both packages use consistent testing patterns:
 - `tests/helpers/*_mother.py` - Test data builders using Object Mother pattern
 - Mock implementations for external services (transcription, embedding)
 - Comprehensive test coverage for use cases, repositories, and services
+
+### Audio Embedder Specific Patterns
+
+**Transcription Services**:
+- `MockAudioTranscriptor` - Fast placeholder transcriptions for development
+- `OpenAIAudioTranscriptor` - Production transcription using OpenAI's `gpt-4o-mini-transcribe` model
+- Streaming transcription support for real-time processing
+
+**Repository Patterns**:
+- `JSONEpisodeRepository` - Reads centralized episode metadata
+- `FileTranscriptionRepository` - Hash-based file storage for transcriptions
+- `MockEmbeddingRepository` - In-memory storage for development/testing
+
+**Use Case Patterns**:
+- `ProcessEpisodesUseCase` - Orchestrates transcription and embedding pipeline
+- `SearchEpisodesUseCase` - Semantic search across transcribed content
+- Dry-run mode support in processing use cases
 
 ## Dependencies
 
@@ -243,4 +269,6 @@ audio_embedder/data/
 - **Testing**: Use Object Mother pattern for test data creation
 - **Logging**: Use custom logger abstraction via `from shared.logger import get_logger`
 - **Architecture**: Follow hexagonal architecture patterns for both packages
-- **Mock First**: audio_embedder currently uses mock implementations for transcription and embedding services
+- **Type Annotations**: Use modern Python type hints (`list[T]` instead of `List[T]`)
+- **Mock First**: audio_embedder provides both mock and real implementations for transcription services
+- **Dry-Run Testing**: Use `--dry-run` flag to test transcription services without persisting data

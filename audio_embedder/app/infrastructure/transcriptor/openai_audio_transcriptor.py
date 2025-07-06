@@ -1,62 +1,67 @@
 import os
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from openai import OpenAI
+
+from ...application.services.audio_transcriptor import AudioTranscriptor
 from ...domain.entities.episode import Episode
 from ...domain.entities.transcription import Transcription
-from ...application.services.audio_transcriptor import AudioTranscriptor
 from ...shared.logger import get_logger
 
 
 class OpenAIAudioTranscriptor(AudioTranscriptor):
-    def __init__(self, api_key: Optional[str] = None, model: str = "gpt-4o-mini-transcribe"):
+    def __init__(
+        self, api_key: Optional[str] = None, model: str = "gpt-4o-mini-transcribe"
+    ):
         self.logger = get_logger(self.__class__.__name__)
         self.model = model
-        
+
         if api_key:
             self.client = OpenAI(api_key=api_key)
         else:
             self.client = OpenAI()
-    
+
     def transcribe(self, episode: Episode) -> Optional[Transcription]:
         if not episode.local_file_path or not os.path.exists(episode.local_file_path):
             self.logger.error(f"Audio file not found: {episode.local_file_path}")
             return None
-        
+
         try:
             self.logger.info(f"Starting transcription for episode: {episode.title}")
-            
+
             with open(episode.local_file_path, "rb") as audio_file:
                 stream = self.client.audio.transcriptions.create(
-                    file=audio_file,
-                    model=self.model,
-                    stream=True,
-                    language="es"
+                    file=audio_file, model=self.model, stream=True, language="es"
                 )
-                
+
                 transcription_text = ""
-                
+
                 for event in stream:
-                    if hasattr(event, 'text') and event.text:
+                    if hasattr(event, "text") and event.text:
                         transcription_text += event.text
-                
+
                 if not transcription_text.strip():
-                    self.logger.warning(f"Empty transcription for episode: {episode.title}")
+                    self.logger.warning(
+                        f"Empty transcription for episode: {episode.title}"
+                    )
                     return None
-                
+
                 transcription = Transcription(
-                    episode_id=episode.url,
+                    episode_id=episode.id,
                     text=transcription_text.strip(),
                     language="es",
                     created_at=datetime.now(),
                     duration=episode.duration,
                     file_path=episode.local_file_path,
-                    confidence_score=None
+                    confidence_score=None,
                 )
-                
-                self.logger.info(f"Successfully transcribed episode: {episode.title} ({len(transcription_text)} characters)")
+
+                self.logger.info(
+                    f"Successfully transcribed episode: {episode.title} ({len(transcription_text)} characters)"
+                )
                 return transcription
-                
+
         except Exception as e:
             self.logger.error(f"Error transcribing episode {episode.title}: {str(e)}")
             return None

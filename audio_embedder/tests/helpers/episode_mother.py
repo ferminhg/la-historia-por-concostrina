@@ -1,12 +1,14 @@
 from datetime import datetime
+
+from app.domain.entities.embedding import Embedding
 from app.domain.entities.episode import Episode
 from app.domain.entities.transcription import Transcription
-from app.domain.entities.embedding import Embedding
 
 
 class EpisodeMother:
     @staticmethod
     def create_episode(
+        id: str = "20250706_120000",
         title: str = "Test Episode",
         description: str = "Test Description",
         url: str = "https://example.com/test.mp3",
@@ -14,12 +16,13 @@ class EpisodeMother:
         duration: int = 900,
         file_size: int = 1000000,
         local_file_path: str = None,
-        podcast: str = None
+        podcast: str = None,
     ) -> Episode:
         if published_date is None:
             published_date = datetime.now()
-        
+
         return Episode(
+            id=id,
             title=title,
             description=description,
             url=url,
@@ -27,9 +30,9 @@ class EpisodeMother:
             duration=duration,
             file_size=file_size,
             local_file_path=local_file_path,
-            podcast=podcast
+            podcast=podcast,
         )
-    
+
     @staticmethod
     def create_transcription(
         episode_id: str = "test-episode",
@@ -38,11 +41,11 @@ class EpisodeMother:
         created_at: datetime = None,
         duration: int = 900,
         file_path: str = None,
-        confidence_score: float = 0.95
+        confidence_score: float = 0.95,
     ) -> Transcription:
         if created_at is None:
             created_at = datetime.now()
-        
+
         return Transcription(
             episode_id=episode_id,
             text=text,
@@ -50,9 +53,9 @@ class EpisodeMother:
             created_at=created_at,
             duration=duration,
             file_path=file_path,
-            confidence_score=confidence_score
+            confidence_score=confidence_score,
         )
-    
+
     @staticmethod
     def create_embedding(
         episode_id: str = "test-episode",
@@ -62,13 +65,13 @@ class EpisodeMother:
         created_at: datetime = None,
         chunk_index: int = 0,
         chunk_text: str = "Test chunk text",
-        metadata: dict = None
+        metadata: dict = None,
     ) -> Embedding:
         if vector is None:
             vector = [0.1] * 384
         if created_at is None:
             created_at = datetime.now()
-        
+
         return Embedding(
             episode_id=episode_id,
             transcription_id=transcription_id,
@@ -77,5 +80,5 @@ class EpisodeMother:
             created_at=created_at,
             chunk_index=chunk_index,
             chunk_text=chunk_text,
-            metadata=metadata
+            metadata=metadata,
         )
