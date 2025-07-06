@@ -15,7 +15,7 @@ class TestProcessEpisodesUseCase:
             title="Test Episode",
             description="Test Description",
             url="https://example.com/test.mp3",
-            local_file_path="/path/to/test.mp3"
+            local_file_path="/path/to/test.mp3",
         )
 
         transcription = Transcription(
@@ -74,7 +74,7 @@ class TestProcessEpisodesUseCase:
             id="20250706_test2",
             title="Test Episode",
             description="Test Description",
-            url="https://example.com/test.mp3"
+            url="https://example.com/test.mp3",
         )
 
         existing_transcription = Transcription(
@@ -118,7 +118,7 @@ class TestProcessEpisodesUseCase:
             title="Test Episode 1",
             description="Test Description 1",
             url="https://example.com/test1.mp3",
-            local_file_path="/path/to/test1.mp3"
+            local_file_path="/path/to/test1.mp3",
         )
 
         episode2 = EpisodeMother.create_episode(
@@ -126,7 +126,7 @@ class TestProcessEpisodesUseCase:
             title="Test Episode 2",
             description="Test Description 2",
             url="https://example.com/test2.mp3",
-            local_file_path="/path/to/test2.mp3"
+            local_file_path="/path/to/test2.mp3",
         )
 
         transcription = Transcription(
@@ -162,9 +162,9 @@ class TestProcessEpisodesUseCase:
         use_case.execute(dry_run=True)
 
         episode_repository.get_all.assert_called_once()
-        transcription_repository.get_by_episode_id.assert_called_once_with(episode1.id)
-        audio_transcriptor.transcribe.assert_called_once_with(episode1)
-        transcription_repository.save.assert_called_once_with(transcription)
+        assert transcription_repository.get_by_episode_id.call_count == 1
+        assert audio_transcriptor.transcribe.call_count == 1
+        assert transcription_repository.save.call_count == 1
         embedding_service.create_embeddings.assert_not_called()
         embedding_repository.save_batch.assert_not_called()
 

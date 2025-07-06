@@ -28,7 +28,7 @@ class FileTranscriptionRepository(TranscriptionRepository):
 
     def save(self, transcription: Transcription) -> Transcription:
         file_path = self._get_file_path(transcription.episode_id)
-        
+
         # Check if file already exists
         if os.path.exists(file_path):
             self.logger.info(
@@ -46,12 +46,12 @@ class FileTranscriptionRepository(TranscriptionRepository):
                     f"returning new transcription without saving"
                 )
                 return transcription
-        
+
         # File doesn't exist, safe to create new one
         data = self._transcription_to_dict(transcription)
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=2)
-        
+
         self.logger.info(f"Transcription saved for episode {transcription.episode_id}")
         return transcription
 

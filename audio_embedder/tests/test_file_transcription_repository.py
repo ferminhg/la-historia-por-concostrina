@@ -14,10 +14,11 @@ class TestFileTranscriptionRepository(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.repository = FileTranscriptionRepository(self.temp_dir)
-        
+
     def tearDown(self):
         # Clean up temp directory
         import shutil
+
         shutil.rmtree(self.temp_dir)
 
     def test_save_new_transcription_creates_file(self):
@@ -34,7 +35,7 @@ class TestFileTranscriptionRepository(unittest.TestCase):
 
         self.assertEqual(result.episode_id, transcription.episode_id)
         self.assertEqual(result.text, transcription.text)
-        
+
         # Verify file was created
         file_path = os.path.join(self.temp_dir, "test_episode_1.json")
         self.assertTrue(os.path.exists(file_path))
@@ -49,10 +50,10 @@ class TestFileTranscriptionRepository(unittest.TestCase):
             duration=900,
             file_path="/original/path.mp3",
         )
-        
+
         # Save original
         self.repository.save(original_transcription)
-        
+
         # Try to save different transcription with same episode_id
         new_transcription = Transcription(
             episode_id="test_episode_2",
@@ -62,16 +63,16 @@ class TestFileTranscriptionRepository(unittest.TestCase):
             duration=1200,
             file_path="/new/path.mp3",
         )
-        
+
         # This should return the original transcription, not save the new one
         result = self.repository.save(new_transcription)
-        
+
         # Result should be the original transcription, not the new one
         self.assertEqual(result.text, "Original transcription text")
         self.assertEqual(result.language, "es")
         self.assertEqual(result.duration, 900)
         self.assertEqual(result.file_path, "/original/path.mp3")
-        
+
         # Verify file content hasn't changed
         file_path = os.path.join(self.temp_dir, "test_episode_2.json")
         with open(file_path, "r", encoding="utf-8") as f:
@@ -87,13 +88,13 @@ class TestFileTranscriptionRepository(unittest.TestCase):
             created_at=datetime(2023, 1, 1, 12, 0, 0),
             duration=900,
         )
-        
+
         # Save transcription
         self.repository.save(transcription)
-        
+
         # Retrieve it
         result = self.repository.get_by_episode_id("test_episode_3")
-        
+
         self.assertIsNotNone(result)
         self.assertEqual(result.episode_id, "test_episode_3")
         self.assertEqual(result.text, "Test get transcription")

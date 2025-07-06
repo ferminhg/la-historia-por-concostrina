@@ -1,6 +1,7 @@
 from ...domain.repositories.embedding_repository import EmbeddingRepository
 from ...domain.repositories.episode_repository import EpisodeRepository
 from ...domain.repositories.transcription_repository import TranscriptionRepository
+from ...domain.repositories.cost_repository import CostRepository
 from ...shared.logger import get_logger
 from ..services.audio_transcriptor import AudioTranscriptor
 from ..services.embedding_service import EmbeddingService
@@ -14,19 +15,22 @@ class ProcessEpisodesUseCase:
         embedding_repository: EmbeddingRepository,
         audio_transcriptor: AudioTranscriptor,
         embedding_service: EmbeddingService,
+        cost_repository: CostRepository = None,
     ):
         self.episode_repository = episode_repository
         self.transcription_repository = transcription_repository
         self.embedding_repository = embedding_repository
         self.audio_transcriptor = audio_transcriptor
         self.embedding_service = embedding_service
+        self.cost_repository = cost_repository
         self.logger = get_logger(self.__class__.__name__)
 
     def execute(self, dry_run: bool = False) -> None:
         episodes = self.episode_repository.get_all()
-        
+
         if dry_run:
             import random
+
             self.logger.info("🧪 DRY RUN MODE: Processing a random episode")
             episodes = [random.choice(episodes)] if episodes else []
 
@@ -74,4 +78,10 @@ class ProcessEpisodesUseCase:
                 self.logger.info(f"[{i}/{total_episodes}] Embeddings created and saved")
 
         if dry_run:
-            self.logger.info("🧪 DRY RUN completed - transcriptions saved, embeddings skipped")
+            self.logger.info(
+                "🧪 DRY RUN completed - transcriptions saved, embeddings skipped"
+            )
+
+        if self.cost_repository:
+            total_cost = self.cost_repository.get_total_cost()
+            self.logger.info(f"💰 Total OpenAI transcription costs: ${total_cost:.4f}")

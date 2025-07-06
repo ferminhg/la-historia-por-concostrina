@@ -12,6 +12,7 @@ from .infrastructure.repositories.json_episode_repository import JSONEpisodeRepo
 from .infrastructure.repositories.mock_embedding_repository import (
     MockEmbeddingRepository,
 )
+from .infrastructure.repositories.file_cost_repository import FileCostRepository
 from .infrastructure.transcriptor.mock_audio_transcriptor import MockAudioTranscriptor
 from .infrastructure.transcriptor.openai_audio_transcriptor import (
     OpenAIAudioTranscriptor,
@@ -19,7 +20,6 @@ from .infrastructure.transcriptor.openai_audio_transcriptor import (
 from .shared.logger import get_logger
 
 data_dir = "../data"
-
 
 
 load_dotenv(override=True)
@@ -44,6 +44,11 @@ def main():
         "--embeddings-dir",
         default="../data/embeddings",
         help="Directory to store embeddings",
+    )
+    parser.add_argument(
+        "--costs-dir",
+        default=os.path.join(data_dir, "costs"),
+        help="Directory to store cost tracking data",
     )
     parser.add_argument(
         "--command",
@@ -74,10 +79,11 @@ def main():
     episode_repository = JSONEpisodeRepository(args.episodes_file)
     transcription_repository = FileTranscriptionRepository(args.transcriptions_dir)
     embedding_repository = MockEmbeddingRepository(args.embeddings_dir)
+    cost_repository = FileCostRepository(args.costs_dir)
 
     if args.transcriptor == "openai":
-        audio_transcriptor = OpenAIAudioTranscriptor()
-        logger.info("Using OpenAI transcriptor")
+        audio_transcriptor = OpenAIAudioTranscriptor(cost_repository=cost_repository)
+        logger.info("Using OpenAI transcriptor with cost tracking")
     else:
         audio_transcriptor = MockAudioTranscriptor()
         logger.info("Using mock transcriptor")
@@ -96,6 +102,7 @@ def main():
             embedding_repository,
             audio_transcriptor,
             embedding_service,
+            cost_repository if args.transcriptor == "openai" else None,
         )
         use_case.execute(dry_run=args.dry_run)
 
