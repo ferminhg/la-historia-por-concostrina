@@ -26,5 +26,10 @@ dependencies:
     - librosa 
     - datasets 
     - accelerate
+    # - openai
+    - langchain
+    - langchain-openai
+    - langchain-community
+    - tiktoken
     - supabase
-    - openai
+    - postgrest
