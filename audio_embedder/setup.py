@@ -6,7 +6,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         "requests",
-        "openai",
+        "langchain>=0.3.0",
+        "langchain-openai>=0.3.0",
+        "langchain-community>=0.3.0",
     ],
     extras_require={
         "dev": [
