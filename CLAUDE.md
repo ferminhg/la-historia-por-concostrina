@@ -50,6 +50,12 @@ make run-embedder           # Run audio embedder (mock transcriptor)
 make run-embedder-openai    # Run audio embedder (OpenAI transcriptor)
 make dry-run-embedder       # Run audio embedder in dry-run mode (mock, 1 episode)
 make dry-run-embedder-openai # Run audio embedder in dry-run mode (OpenAI, 1 episode)
+make transcriptions-to-embeddings     # Convert existing transcriptions to embeddings
+make dry-run-transcriptions-to-embeddings # Convert transcriptions to embeddings in dry-run mode
+make transcriptions-to-embeddings-supabase # Convert transcriptions to embeddings using Supabase
+make dry-run-transcriptions-to-embeddings-supabase # Convert transcriptions to embeddings using Supabase in dry-run mode
+make search-supabase QUERY='search term'     # Search episodes in Supabase
+make episode-summary EPISODE_ID='episode_id' # Get episode summary from Supabase
 
 # Individual package installation
 make install-crawler      # Install only podcast_crawler
@@ -93,6 +99,12 @@ make run-openai    # Run with OpenAI transcriptor
 make dry-run       # Run in dry-run mode (mock, 1 episode)
 make dry-run-openai # Run in dry-run mode (OpenAI, 1 episode)
 make search        # Search episodes
+make transcriptions-to-embeddings     # Convert existing transcriptions to embeddings
+make dry-run-transcriptions-to-embeddings # Convert transcriptions to embeddings in dry-run mode
+make transcriptions-to-embeddings-supabase # Convert transcriptions to embeddings using Supabase
+make dry-run-transcriptions-to-embeddings-supabase # Convert transcriptions to embeddings using Supabase in dry-run mode
+make search-supabase QUERY='search term'     # Search episodes in Supabase
+make episode-summary EPISODE_ID='episode_id' # Get episode summary from Supabase
 
 # Manual execution
 python -m app.main --command process --transcriptor mock
@@ -100,6 +112,13 @@ python -m app.main --command process --transcriptor openai
 python -m app.main --command process --transcriptor mock --dry-run
 python -m app.main --command process --transcriptor openai --dry-run
 python -m app.main --command search --query "your search query"
+python -m app.main --command transcriptions-to-embeddings
+python -m app.main --command transcriptions-to-embeddings --dry-run
+python -m app.main --command transcriptions-to-embeddings --use-supabase
+python -m app.main --command transcriptions-to-embeddings --use-supabase --dry-run
+python -m app.main --command search-supabase --query "Iglesia catolica"
+python -m app.main --command search-supabase --query "search term" --episode-id "20240520_190000"
+python -m app.main --command search-supabase --episode-id "20240520_190000" --show-summary
 ```
 
 ### Running Tests
@@ -119,6 +138,24 @@ cd audio_embedder && pytest tests/ -v
 pytest tests/test_xml_processor.py::TestXMLProcessor::test_parses_duration_formats -v
 ```
 
+### Supabase Vector Search
+```bash
+# Search across all episodes
+make search-supabase QUERY='Iglesia catolica'
+make search-supabase QUERY='Guerra Civil' TOP_K=10
+
+# Search within specific episode
+make search-supabase QUERY='Francisco Franco' EPISODE_ID='20240520_190000'
+
+# Get episode summary and statistics
+make episode-summary EPISODE_ID='20240520_190000'
+
+# Manual execution with more options
+python -m app.main --command search-supabase --query "your search" --top-k 5
+python -m app.main --command search-supabase --query "search" --episode-id "episode_id" --top-k 3
+python -m app.main --command search-supabase --episode-id "episode_id" --show-summary
+```
+
 ### Jupyter Notebooks
 ```bash
 # Start JupyterLab
@@ -127,6 +164,7 @@ jupyter lab
 # Key notebooks:
 # - notebooks/scrapping_episodies.ipynb - Downloads RSS feeds and episode metadata (deprecated)
 # - notebooks/audio_transcriptions.ipynb - Transcribes audio using OpenAI API
+# - notebooks/transcription_embedders.ipynb - Supabase vector search implementation
 ```
 
 ## Architecture
@@ -206,6 +244,12 @@ Both packages use consistent testing patterns:
 - `OpenAIAudioTranscriptor` - Production transcription using OpenAI's `gpt-4o-mini-transcribe` model
 - Streaming transcription support for real-time processing
 
+**Cost Tracking**:
+- `FileCostRepository` - Tracks OpenAI API costs with persistent JSON storage
+- Automatic cost calculation based on audio duration (~$0.006/minute)
+- Cost deduplication to prevent double-charging
+- Total cost reporting and daily/monthly summaries
+
 **Repository Patterns**:
 - `JSONEpisodeRepository` - Reads centralized episode metadata
 - `FileTranscriptionRepository` - Hash-based file storage for transcriptions
@@ -213,18 +257,29 @@ Both packages use consistent testing patterns:
 
 **Use Case Patterns**:
 - `ProcessEpisodesUseCase` - Orchestrates transcription and embedding pipeline
-- `SearchEpisodesUseCase` - Semantic search across transcribed content
+- `SearchEpisodesUseCase` - Semantic search across transcribed content (local storage)
+- `TranscriptionsToEmbeddingsUseCase` - Converts existing transcriptions to embeddings with semantic chunking
+- `SearchSupabaseUseCase` - Direct semantic search in Supabase vector database
 - Dry-run mode support in processing use cases
+
+**Enhanced Features**:
+- `SemanticChunker` - Advanced text chunking for podcast transcriptions with topic boundary detection
+- `SupabaseEmbeddingService` - OpenAI embeddings with Supabase vector storage integration
+- Supports both local mock storage and Supabase vector database
+- Episode-specific search and summary functionality
 
 ## Dependencies
 
 ### Shared Dependencies (requirements.txt)
 - **requests**: HTTP requests for RSS feeds and audio downloads  
-- **openai**: OpenAI API client for audio transcription
+- **langchain**: LLM framework for audio transcription and AI processing
+- **langchain-openai**: OpenAI integration for langchain
+- **langchain-community**: Community tools and utilities for langchain
 - **feedparser**: RSS feed parsing
 - **pytest**: Testing framework
 - **pytest-cov**: Test coverage reporting
 - **ruff**: Code formatting and linting
+- **python-dotenv**: Environment variable management
 
 ### Conda Environment Dependencies (notebooks/enviroments.yml)
 - **Python 3.11**: Base runtime
@@ -240,6 +295,12 @@ Both packages use consistent testing patterns:
 Required for audio transcription functionality:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
+```
+
+Required for Supabase embeddings functionality:
+```
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_key
 ```
 
 ## Data Sources
@@ -258,7 +319,8 @@ data/
 
 audio_embedder/data/
 ├── transcriptions/       # Episode transcriptions (hash-based JSON files)
-└── embeddings/          # Vector embeddings storage
+├── embeddings/          # Vector embeddings storage
+└── costs/               # OpenAI API cost tracking data
 ```
 
 ## Development Guidelines

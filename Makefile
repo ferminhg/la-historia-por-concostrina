@@ -1,4 +1,4 @@
-.PHONY: help install install-crawler install-embedder tests tests-crawler tests-embedder lint format clean run-crawler run-embedder run-embedder-openai dry-run-embedder dry-run-embedder-openai
+.PHONY: help install install-crawler install-embedder tests tests-crawler tests-embedder lint format clean run-crawler run-embedder run-embedder-openai dry-run-embedder dry-run-embedder-openai transcriptions-to-embeddings dry-run-transcriptions-to-embeddings transcriptions-to-embeddings-supabase dry-run-transcriptions-to-embeddings-supabase search-supabase episode-summary
 
 help:
 	@echo "🎙️  La Historia Por Concostrina - Development Commands"
@@ -24,6 +24,12 @@ help:
 	@echo "  run-embedder-openai    - Run audio embedder (OpenAI transcriptor)"
 	@echo "  dry-run-embedder       - Run audio embedder in dry-run mode (mock, 1 episode)"
 	@echo "  dry-run-embedder-openai - Run audio embedder in dry-run mode (OpenAI, 1 episode)"
+	@echo "  transcriptions-to-embeddings     - Convert existing transcriptions to embeddings"
+	@echo "  dry-run-transcriptions-to-embeddings - Convert transcriptions to embeddings in dry-run mode"
+	@echo "  transcriptions-to-embeddings-supabase - Convert transcriptions to embeddings using Supabase"
+	@echo "  dry-run-transcriptions-to-embeddings-supabase - Convert transcriptions to embeddings using Supabase in dry-run mode"
+	@echo "  search-supabase      - Search episodes in Supabase (requires QUERY variable)"
+	@echo "  episode-summary      - Show episode summary (requires EPISODE_ID variable)"
 	@echo ""
 	@echo "📚 Individual package commands available in:"
 	@echo "  cd podcast_crawler && make help"
@@ -105,3 +111,46 @@ dry-run-embedder-openai:
 	@echo "🧪 Running audio embedder in DRY RUN mode (OpenAI transcriptor)..."
 	@echo "⚠️  Make sure OPENAI_API_KEY is set!"
 	cd audio_embedder && python -m app.main --transcriptor openai --dry-run
+
+transcriptions-to-embeddings:
+	@echo "🚀 Converting existing transcriptions to embeddings..."
+	cd audio_embedder && python -m app.main --command transcriptions-to-embeddings
+
+dry-run-transcriptions-to-embeddings:
+	@echo "🧪 Converting transcriptions to embeddings in DRY RUN mode..."
+	cd audio_embedder && python -m app.main --command transcriptions-to-embeddings --dry-run
+
+transcriptions-to-embeddings-supabase:
+	@echo "🚀 Converting existing transcriptions to embeddings using Supabase..."
+	@echo "⚠️  Make sure SUPABASE_URL and SUPABASE_KEY are set!"
+	cd audio_embedder && python -m app.main --command transcriptions-to-embeddings --use-supabase
+
+dry-run-transcriptions-to-embeddings-supabase:
+	@echo "🧪 Converting transcriptions to embeddings using Supabase in DRY RUN mode..."
+	@echo "⚠️  Make sure SUPABASE_URL and SUPABASE_KEY are set!"
+	cd audio_embedder && python -m app.main --command transcriptions-to-embeddings --use-supabase --dry-run
+
+search-supabase:
+	@echo "🔍 Searching episodes in Supabase..."
+	@echo "⚠️  Make sure SUPABASE_URL and SUPABASE_KEY are set!"
+	@if [ -z "$(QUERY)" ]; then \
+		echo "❌ Error: QUERY variable is required."; \
+		echo "💡 Usage: make search-supabase QUERY='Iglesia catolica'"; \
+		echo "📝 Optional: EPISODE_ID='20240520_190000' TOP_K=5"; \
+		exit 1; \
+	fi
+	@if [ -n "$(EPISODE_ID)" ]; then \
+		cd audio_embedder && python -m app.main --command search-supabase --query "$(QUERY)" --episode-id "$(EPISODE_ID)" --top-k $(if $(TOP_K),$(TOP_K),5); \
+	else \
+		cd audio_embedder && python -m app.main --command search-supabase --query "$(QUERY)" --top-k $(if $(TOP_K),$(TOP_K),5); \
+	fi
+
+episode-summary:
+	@echo "📊 Getting episode summary from Supabase..."
+	@echo "⚠️  Make sure SUPABASE_URL and SUPABASE_KEY are set!"
+	@if [ -z "$(EPISODE_ID)" ]; then \
+		echo "❌ Error: EPISODE_ID variable is required."; \
+		echo "💡 Usage: make episode-summary EPISODE_ID='20240520_190000'"; \
+		exit 1; \
+	fi
+	cd audio_embedder && python -m app.main --command search-supabase --episode-id "$(EPISODE_ID)" --show-summary
